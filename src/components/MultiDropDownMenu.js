@@ -136,7 +136,7 @@ export default class MultiDropDownMenu extends Component {
     /**
      * 处理点击树状节点操作，只需考虑子节点的情况
      *
-     * 增加自动勾选所有的子级别目录 2016.6.15*__*
+     * 增加自动勾选所有的子级别目录 2016.6.15 *__*
      *
      * @param ele
      */
