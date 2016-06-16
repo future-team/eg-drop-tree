@@ -5,7 +5,7 @@
 import React, { Component ,PropTypes} from 'react';
 import {render} from 'react/lib/ReactDOM';
 require('./public.less');
-import MultiDropDownMenu from "../../src/index.js";//联想功能组件
+import MultiDropDown from "../../src/index.js";//联想功能组件
 export default class IndexModule extends Component {
     constructor(props,context){
         super(props,context);
@@ -99,11 +99,11 @@ export default class IndexModule extends Component {
             <div className="paddingSpace">
 
                 <div style={{fontSize:'12px',display:'inline-block',width:'200px'}}>
-                    <MultiDropDownMenu dropDownData={mockMultiDropData} keyName='typeName' leafName='leaf' title="树状列表选择" ref="MultiDropDownMenu"/>
+                    <MultiDropDown dropDownData={mockMultiDropData} keyName='typeName' leafName='leaf' title="树状列表选择" ref="MultiDropDown"/>
                 </div>
 
                 <div className='demo-button-container'>
-                    <div className='demo-button' style={{background:'red'}} onClick={()=>{this.getDropDownData('MultiDropDownMenu')}}>点击获取树状列表的选择结果</div></div>
+                    <div className='demo-button' style={{background:'red'}} onClick={()=>{this.getDropDownData('MultiDropDown')}}>点击获取树状列表的选择结果</div></div>
             </div>
         );
     }

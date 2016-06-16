@@ -164,7 +164,8 @@ export default class MultiDropDownMenu extends Component {
             //遍历子树，推送所有的branch
             this.iterateSourceData(ele.children,function(data){
                 if(data&&!data.leaf){
-                    cachedDropDownBranch.push(data);
+                    let index = cachedDropDownBranch.indexOf(data);
+                    index<0&&cachedDropDownBranch.push(data);
                 }else{
                     let index = cachedFormGroup.indexOf(data);
                     index<0&&cachedFormGroup.push(data)

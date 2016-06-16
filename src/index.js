@@ -1,10 +1,10 @@
 require('../css/index.less');
-import MultiDropDownMenu from './components/MultiDropDownMenu.js';//下拉层级菜单
+import MultiDropDown from './components/MultiDropDownMenu.js';//下拉层级菜单
 
 if(window.Eagleui){
-    Eagleui.MultiDropDownMenu = MultiDropDownMenu;
+    Eagleui.MultiDropDown = MultiDropDown;
 }else{
-    window.MultiDropDownMenu=MultiDropDownMenu
+    window.MultiDropDown=MultiDropDown
 };
-module.exports=MultiDropDownMenu;
+module.exports=MultiDropDown;
 
