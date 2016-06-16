@@ -89,12 +89,12 @@ export default class MultiDropDownMenu extends Component {
         let {formGroup,keyName,dropDownBranch}=this.state;
         if(type=='branch'){
             //树枝节点
-            xml = <li key={depth+ele[keyName]} className={index==activeIndex?"on":''}>
-                <div className='multi-list-checkbox'
-                     onClick={()=>{
+            xml = <li key={depth+ele[keyName]} className={index==activeIndex?"on":''}
+                      onClick={()=>{
                             //设置branch数据状态
                             this.branchCheckBoxHandler(ele);
                      }}>
+                <div className='multi-list-checkbox'>
                     <b className={dropDownBranch.indexOf(ele)>=0?'active':''}></b>
                 </div>
                 <div className='multi-drop-down-list-content'
@@ -263,7 +263,7 @@ export default class MultiDropDownMenu extends Component {
                     <i className='drop-down-arrow'></i>
                 </div>
                 {dropDownData&&dropDownData.length>0?
-                    <div className="question-multi-menu-body" style={{display:'block'}}>
+                    <div className="question-multi-menu-body">
                         {
                             this.renderChildMenu(dropDownData,0,dropDownQueue)/*来自第0层*/
                         }
