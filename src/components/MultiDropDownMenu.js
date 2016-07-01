@@ -167,11 +167,21 @@ export default class MultiDropDownMenu extends Component {
         return cachedDropDownQueue;
     }
 
+    componentWillReceiveProps(nextProps) {
+        if(nextProps.dropDownData){
+            this.generateTreePathMap(this.treePathMap);
+        }
+    }
 
     updateParentNode(ele,dropDownBranch,formGroup){
         let {treePathMap}=this,
-            {dropDownData}= this.props,
-            path=treePathMap[ele.typeId].split(',');
+            {dropDownData}= this.props;
+            var path=[];
+            if(treePathMap[ele.typeId]){
+                path=treePathMap[ele.typeId].split(',');
+            }else{
+              return;
+            }
         //去除根节点-1
         path.shift();
         //去除自身index，只留下中间路径
