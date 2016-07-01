@@ -29,6 +29,31 @@ export default class MultiDropDownMenu extends Component {
             leafName:props.leafName
         };
         this.formData=this.state.formGroup;
+        this.treePathMap={
+
+        }
+        this.generateTreePathMap(this.treePathMap);
+    }
+    generateTreePathMap(treePathMap){
+        //缓存所有节点的路径信息，根节点的index假设为-1
+        let {dropDownData}= this.props;
+        this.climbTree('-1',dropDownData,treePathMap)
+        //console.log(this.treePathMap);
+    }
+
+    climbTree(path,list,treePathMap){
+        var self=this;
+        if(list&&list.length){
+            list.forEach((item,index)=>{
+                let currentPath=path+','+index,
+                    itemChildren=item.children;
+                treePathMap[item.typeId]=currentPath;
+
+                if(itemChildren&&itemChildren.length){
+                    self.climbTree(currentPath,itemChildren,treePathMap);
+                }
+            });
+        }
     }
     static defaultProps={
         leafName:'leaf',
@@ -50,6 +75,11 @@ export default class MultiDropDownMenu extends Component {
         leafName:PropTypes.string
     };
 
+    getParams(){
+        return this.state.formGroup.map((item)=>{
+            return item.typeId;
+        });
+    }
     /**
      * 渲染标题
      * @param formGroup
@@ -68,7 +98,8 @@ export default class MultiDropDownMenu extends Component {
      * @param ele
      */
     checkboxHandler(ele){
-        var cachedFormGroup=this.state.formGroup;
+        var cachedFormGroup=this.state.formGroup,
+            cachedDropDownBranch=this.state.dropDownBranch;
         /**
          * 按照如下格式存取对外调用的数据，确保完备
          * [ele]//ele为数组中的每一项
@@ -79,8 +110,10 @@ export default class MultiDropDownMenu extends Component {
         }else{
             cachedFormGroup.push(ele)
         }
+        this.updateParentNode(ele,cachedDropDownBranch,cachedFormGroup);
         this.setState({
             formGroup:cachedFormGroup,
+            dropDownBranch:cachedDropDownBranch,
             title:this.renderTitle(cachedFormGroup)||this.props.title
         })
     }
@@ -133,6 +166,61 @@ export default class MultiDropDownMenu extends Component {
         });
         return cachedDropDownQueue;
     }
+
+
+    updateParentNode(ele,dropDownBranch,formGroup){
+        let {treePathMap}=this,
+            {dropDownData}= this.props,
+            path=treePathMap[ele.typeId].split(',');
+        //去除根节点-1
+        path.shift();
+        //去除自身index，只留下中间路径
+        path.pop();
+        let sblings=dropDownData,
+            parent={
+                typeId:'0'
+            };
+        if(path.length){
+            path.forEach((index)=>{
+                parent=sblings[index];
+                sblings=sblings[index].children;
+            })
+            //console.log(path,sblings)
+            var cachedMap={};
+            dropDownBranch.forEach((item)=>{
+                cachedMap[item.typeId]=true;
+            })
+            formGroup.forEach((item)=>{
+                cachedMap[item.typeId]=true;
+            })
+            //console.log(cachedMap);
+            var currentId=ele.typeId;
+            //勾中checkbox,要检查是否全部勾中
+            if(cachedMap[currentId]){
+                var selectAll=true;
+                sblings.forEach((item)=>{
+                    if(!cachedMap[item.typeId]){
+                        selectAll=false;
+                    }
+                })
+                //如果全部勾中，需要添加parent节点
+                if(selectAll){
+                    if(parent.typeId!='0'){
+                        dropDownBranch.push(parent);
+                        this.updateParentNode(parent,dropDownBranch,formGroup)
+                    }
+                }
+            }else{
+                //取消勾选
+                let index = dropDownBranch.indexOf(parent);
+                index > -1 && dropDownBranch.splice(index,1);
+                if(parent.typeId!='0') {
+                    this.updateParentNode(parent,dropDownBranch,formGroup)
+                }
+            }
+        }
+    }
+
     /**
      * 处理点击树状节点操作，只需考虑子节点的情况
      *
@@ -172,6 +260,12 @@ export default class MultiDropDownMenu extends Component {
                 }
             });
         }
+        this.updateParentNode(ele,cachedDropDownBranch,cachedFormGroup);
+        //console.log('branch',this.state,{
+        //    dropDownBranch:cachedDropDownBranch,
+        //    formGroup:cachedFormGroup,
+        //    title:this.renderTitle(cachedFormGroup)||this.props.title
+        //})
         this.setState({
             dropDownBranch:cachedDropDownBranch,
             formGroup:cachedFormGroup,
