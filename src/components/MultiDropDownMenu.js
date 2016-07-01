@@ -32,11 +32,11 @@ export default class MultiDropDownMenu extends Component {
         this.treePathMap={
 
         }
-        this.generateTreePathMap(this.treePathMap);
+        this.generateTreePathMap(this.treePathMap,this.props);
     }
-    generateTreePathMap(treePathMap){
+    generateTreePathMap(treePathMap,props){
         //缓存所有节点的路径信息，根节点的index假设为-1
-        let {dropDownData}= this.props;
+        let {dropDownData}= props;
         this.climbTree('-1',dropDownData,treePathMap)
         //console.log(this.treePathMap);
     }
@@ -169,7 +169,7 @@ export default class MultiDropDownMenu extends Component {
 
     componentWillReceiveProps(nextProps) {
         if(nextProps.dropDownData){
-            this.generateTreePathMap(this.treePathMap);
+            this.generateTreePathMap(this.treePathMap,nextProps);
         }
     }
 
