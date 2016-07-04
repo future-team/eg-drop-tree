@@ -155,7 +155,11 @@
           display: inline-block;
           vertical-align: middle;
           span{
-            word-wrap: break-word;
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            word-wrap: normal;
           }
         }
       }
