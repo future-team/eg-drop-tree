@@ -22,6 +22,17 @@ export default class IndexModule extends Component {
                     "secondOwnerId": 0,
                     "children": [
                         {
+                            "typeId": 1000022,
+                            "parentTypeId": 10005,
+                            "typeName": "线上测试",
+                            "leadingAnswer": "这是线上测试分类,你玩我吧!",
+                            "level": 3,
+                            "firstOwnerId": 22315,
+                            "secondOwnerId": 17896,
+                            "children": [],
+                            "leaf": true
+                        },
+                        {
                             "typeId": 1000023,
                             "parentTypeId": 10005,
                             "typeName": "线上测试",
