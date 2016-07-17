@@ -31,26 +31,65 @@ export default class MultiDropDownMenu extends Component {
         this.formData=this.state.formGroup;
         this.treePathMap={
 
-        }
-        this.generateTreePathMap(this.treePathMap,this.props);
+        };
+        let activeNodeList=[];
+        let activeBranchList=[];
+        this.generateTreePathMap(this.treePathMap,this.props,activeNodeList,activeBranchList);
+        this.state.formGroup=activeNodeList;
+        this.state.dropDownBranch=activeBranchList;
+        this.state.title=this.renderTitle(activeNodeList)||this.props.title;
     }
-    generateTreePathMap(treePathMap,props){
+    generateTreePathMap(treePathMap,props,activeNodeList,activeBranchList){
         //缓存所有节点的路径信息，根节点的index假设为-1
-        let {dropDownData}= props;
-        this.climbTree('-1',dropDownData,treePathMap)
-        //console.log(this.treePathMap);
+        let {dropDownData,selected}= props;
+        let selectedMap={};
+        if(selected){
+            let selectedList=selected.split(',');
+            selectedList.forEach(function(id){
+                selectedMap[id]=true;
+            })
+        }
+        this.climbTree('-1',dropDownData,treePathMap,selectedMap,activeNodeList);
+        this.selectActiveBranchNode({
+            typeId:'-1',
+            children:dropDownData
+        },activeBranchList,selectedMap)
     }
+    selectActiveBranchNode(item,activeBranchList,selectedMap){
+        let self=this;
+        let itemChildren=item.children?item.children:[];
+        if(itemChildren.length==0){
+            if(selectedMap[item.typeId]){
+                return true;
+            }else{
+                return false
+            }
+        }else{
+            var childrenSelectAll=true;
 
-    climbTree(path,list,treePathMap){
+            for(let subIndex=0;subIndex<itemChildren.length;subIndex++){
+                childrenSelectAll=self.selectActiveBranchNode(itemChildren[subIndex],activeBranchList,selectedMap)&&childrenSelectAll;
+            }
+            if(childrenSelectAll){
+                if(item.typeId!=-1){
+                    activeBranchList.push(item);
+                }
+            }
+            return childrenSelectAll
+        }
+    }
+    climbTree(path,list,treePathMap,selectedMap,activeNodeList){
         var self=this;
         if(list&&list.length){
             list.forEach((item,index)=>{
                 let currentPath=path+','+index,
                     itemChildren=item.children;
                 treePathMap[item.typeId]=currentPath;
-
+                if(selectedMap&&selectedMap[item.typeId]){
+                    activeNodeList.push(item);
+                }
                 if(itemChildren&&itemChildren.length){
-                    self.climbTree(currentPath,itemChildren,treePathMap);
+                    self.climbTree(currentPath,itemChildren,treePathMap,selectedMap,activeNodeList);
                 }
             });
         }
@@ -169,7 +208,14 @@ export default class MultiDropDownMenu extends Component {
 
     componentWillReceiveProps(nextProps) {
         if(nextProps.dropDownData){
-            this.generateTreePathMap(this.treePathMap,nextProps);
+            let activeNodeList=[];
+            let activeBranchList=[];
+            this.generateTreePathMap(this.treePathMap,nextProps,activeNodeList,activeBranchList);
+            this.setState({
+                formGroup:activeNodeList,
+                title:this.renderTitle(activeNodeList)||this.props.title,
+                dropDownBranch:activeBranchList
+            });
         }
     }
 
