@@ -1,6 +1,6 @@
 {
   "name": "eg-drop-tree",
-  "version": "0.1.7",
+  "version": "1.0.0",
   "description": "multi-data-tree drop-down for react pc app",
   "main": "lib/",
   "repository": "git@github.com:future-team/eg-drop-tree.git",

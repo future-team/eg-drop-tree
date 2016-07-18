@@ -150,11 +150,15 @@ export default class MultiDropDownMenu extends Component {
             cachedFormGroup.push(ele)
         }
         this.updateParentNode(ele,cachedDropDownBranch,cachedFormGroup);
-        this.setState({
-            formGroup:cachedFormGroup,
-            dropDownBranch:cachedDropDownBranch,
-            title:this.renderTitle(cachedFormGroup)||this.props.title
+        let selectedIdList=cachedFormGroup.map((item)=>{
+            return item.typeId;
         })
+        this.props.onChange&&this.props.onChange(selectedIdList.join(','));
+        //this.setState({
+        //    formGroup:cachedFormGroup,
+        //    dropDownBranch:cachedDropDownBranch,
+        //    title:this.renderTitle(cachedFormGroup)||this.props.title
+        //})
     }
     renderList(type,ele,activeIndex,index,depth){
         let xml = null;
@@ -322,11 +326,15 @@ export default class MultiDropDownMenu extends Component {
         //    formGroup:cachedFormGroup,
         //    title:this.renderTitle(cachedFormGroup)||this.props.title
         //})
-        this.setState({
-            dropDownBranch:cachedDropDownBranch,
-            formGroup:cachedFormGroup,
-            title:this.renderTitle(cachedFormGroup)||this.props.title
+        let selectedIdList=cachedFormGroup.map((item)=>{
+            return item.typeId;
         })
+        this.props.onChange&&this.props.onChange(selectedIdList.join(','));
+        //this.setState({
+        //    dropDownBranch:cachedDropDownBranch,
+        //    formGroup:cachedFormGroup,
+        //    title:this.renderTitle(cachedFormGroup)||this.props.title
+        //})
     }
     /**
      * 遍历数据，执行自定义操作
