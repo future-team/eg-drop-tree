@@ -111,6 +111,9 @@ export default class MultiDropDownMenu extends Component {
             cachedFormGroup.push(ele)
         }
         this.updateParentNode(ele,cachedDropDownBranch,cachedFormGroup);
+        this.props.itemClickCallback&&this.props.itemClickCallback( cachedFormGroup.map((item)=>{
+            return item.typeId;
+        }));
         this.setState({
             formGroup:cachedFormGroup,
             dropDownBranch:cachedDropDownBranch,
@@ -276,6 +279,9 @@ export default class MultiDropDownMenu extends Component {
         //    formGroup:cachedFormGroup,
         //    title:this.renderTitle(cachedFormGroup)||this.props.title
         //})
+        this.props.itemClickCallback&&this.props.itemClickCallback( cachedFormGroup.map((item)=>{
+            return item.typeId;
+        }));
         this.setState({
             dropDownBranch:cachedDropDownBranch,
             formGroup:cachedFormGroup,
