@@ -165,7 +165,7 @@ export default class MultiDropDownMenu extends Component {
         let {formGroup,keyName,dropDownBranch}=this.state;
         if(type=='branch'){
             //树枝节点
-            xml = <li key={depth+ele['typeId']} className={index==activeIndex?"on":''}
+            xml = <li key={depth+ele['typeId']} title={ele[keyName]} className={index==activeIndex?"on":''}
                       onClick={()=>{
                             //设置branch数据状态
                             this.branchCheckBoxHandler(ele);
@@ -184,7 +184,7 @@ export default class MultiDropDownMenu extends Component {
             </li>
         }else{
             //如果数据在formGroup里面，则勾选
-            xml = <li className="multi-drop-down-input" onClick={()=>{this.checkboxHandler(ele)}} key={depth+ele['typeId']}>
+            xml = <li title={ele[keyName]}  className="multi-drop-down-input" onClick={()=>{this.checkboxHandler(ele)}} key={depth+ele['typeId']}>
                 <i className={formGroup.indexOf(ele)<0?'check-box':'check-box active'}>
                     <b></b>
                 </i>
