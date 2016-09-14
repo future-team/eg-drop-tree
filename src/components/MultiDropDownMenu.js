@@ -23,6 +23,7 @@ export default class MultiDropDownMenu extends Component {
         this.state={
             dropDownBranch:[],//树状分支节点鼠标点击事件存取,
             dropDownQueue:[],
+            partSelectBranch:{},//分支节点的map，只要其子节点至少有一个被选中，就将该节点cache进来
             formGroup:[],//最后存取的数据
             title:props.title,
             keyName:props.keyName,
@@ -32,14 +33,16 @@ export default class MultiDropDownMenu extends Component {
         this.treePathMap={
 
         };
-        let activeNodeList=[];
-        let activeBranchList=[];
-        this.generateTreePathMap(this.treePathMap,this.props,activeNodeList,activeBranchList);
+        let activeNodeList=[],
+            activeBranchList=[],
+            partSelectBranch={};
+        this.generateTreePathMap(this.treePathMap,this.props,activeNodeList,activeBranchList,partSelectBranch);
         this.state.formGroup=activeNodeList;
         this.state.dropDownBranch=activeBranchList;
+        this.state.partSelectBranch=partSelectBranch;
         this.state.title=this.renderTitle(activeNodeList)||this.props.title;
     }
-    generateTreePathMap(treePathMap,props,activeNodeList,activeBranchList){
+    generateTreePathMap(treePathMap,props,activeNodeList,activeBranchList,partSelectBranch){
         //缓存所有节点的路径信息，根节点的index假设为-1
         let {dropDownData,selected}= props;
         let selectedMap={};
@@ -54,6 +57,40 @@ export default class MultiDropDownMenu extends Component {
             typeId:'-1',
             children:dropDownData
         },activeBranchList,selectedMap)
+
+        this.findPartSelectBranchNode({
+            typeId:'-1',
+            children:dropDownData
+        },partSelectBranch,selectedMap);
+        //目前partSelectBranch包含子节点全选中的情况，需要将这种情况排除
+        activeBranchList.forEach(function(item){
+            if(partSelectBranch[item.typeId]){
+                delete partSelectBranch[item.typeId];
+            }
+        });
+    }
+    findPartSelectBranchNode(item,partSelectBranch,selectedMap){
+        let self=this;
+        let itemChildren=item.children?item.children:[];
+        if(itemChildren.length==0){
+            if(selectedMap[item.typeId]){
+                return true;
+            }else{
+                return false
+            }
+        }else{
+            var partSelect=false;
+
+            for(let subIndex=0;subIndex<itemChildren.length;subIndex++){
+                partSelect=self.findPartSelectBranchNode(itemChildren[subIndex],partSelectBranch,selectedMap)||partSelect;
+            }
+            if(partSelect){
+                if(item.typeId!=-1){
+                    partSelectBranch[item.typeId]=true;
+                }
+            }
+            return partSelect
+        }
     }
     selectActiveBranchNode(item,activeBranchList,selectedMap){
         let self=this;
@@ -162,7 +199,7 @@ export default class MultiDropDownMenu extends Component {
     }
     renderList(type,ele,activeIndex,index,depth){
         let xml = null;
-        let {formGroup,keyName,dropDownBranch}=this.state;
+        let {formGroup,keyName,dropDownBranch,partSelectBranch}=this.state;
         if(type=='branch'){
             //树枝节点
             xml = <li key={depth+ele['typeId']} title={ele[keyName]} className={index==activeIndex?"on":''}
@@ -171,7 +208,7 @@ export default class MultiDropDownMenu extends Component {
                             this.branchCheckBoxHandler(ele);
                      }}>
                 <div className='multi-list-checkbox'>
-                    <b className={dropDownBranch.indexOf(ele)>=0?'active':''}></b>
+                    <b className={(dropDownBranch.indexOf(ele)>=0?'active':'')+(partSelectBranch[ele.typeId]?' part-select':'')}></b>
                 </div>
                 <div className='multi-drop-down-list-content'
                      onMouseOver={()=>{
@@ -212,14 +249,16 @@ export default class MultiDropDownMenu extends Component {
 
     componentWillReceiveProps(nextProps) {
         if(nextProps.dropDownData){
-            let activeNodeList=[];
-            let activeBranchList=[];
-            this.generateTreePathMap(this.treePathMap,nextProps,activeNodeList,activeBranchList);
+            let activeNodeList=[],
+                activeBranchList=[],
+                partSelectBranch={};
+            this.generateTreePathMap(this.treePathMap,nextProps,activeNodeList,activeBranchList,partSelectBranch);
             this.setState({
                 formGroup:activeNodeList,
                 title:this.renderTitle(activeNodeList)||this.props.title,
-                dropDownBranch:activeBranchList
-            });
+                dropDownBranch:activeBranchList,
+                partSelectBranch:partSelectBranch
+        });
         }
     }
 
