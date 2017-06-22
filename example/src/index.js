@@ -2735,18 +2735,23 @@ export default class IndexModule extends Component {
             <div className="paddingSpace">
 
                 <div style={{fontSize:'12px',display:'inline-block',width:'200px'}}>
-                    <MultiDropDown selected={
-                    this.state.selected
-                   }
-                                   onChange={
-                                   function(e){
-                                    _this.setState({
+                    <MultiDropDown
+                        selected={
+                            this.state.selected
+                        }
+                        onChange={
+                            function(e){
+                                _this.setState({
                                    selected:e
-                                   })
-                                   }
+                                })
+                           }
 
-                                   }
-                                   dropDownData={this.state.mockMultiDropData} keyName='typeName' leafName='leaf' title="树状列表选择" ref="MultiDropDown"/>
+                        }
+                        dropDownData={this.state.mockMultiDropData}
+                        keyName='typeName'
+                        leafName='leaf'
+                        title="树状列表选择"
+                        ref="MultiDropDown"/>
                 </div>
 
                 <div className='demo-button-container'>

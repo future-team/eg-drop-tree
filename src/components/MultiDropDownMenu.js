@@ -22,7 +22,6 @@ export default class MultiDropDownMenu extends Component {
         super(props,context);
         this.state={
             dropDownBranch:[],//树状分支节点鼠标点击事件存取,
-            dropDownQueue:[],
             partSelectBranch:{},//分支节点的map，只要其子节点至少有一个被选中，就将该节点cache进来
             formGroup:[],//最后存取的数据
             title:props.title,
@@ -197,31 +196,40 @@ export default class MultiDropDownMenu extends Component {
         //    title:this.renderTitle(cachedFormGroup)||this.props.title
         //})
     }
-    renderList(type,ele,activeIndex,index,depth){
+    renderList(type,ele,index){
         let xml = null;
-        let {formGroup,keyName,dropDownBranch,partSelectBranch}=this.state;
+        let {formGroup,keyName,dropDownBranch,partSelectBranch,leafName}=this.state;
         if(type=='branch'){
             //树枝节点
-            xml = <li key={depth+ele['typeId']} title={ele[keyName]} className={index==activeIndex?"on":''}
-                      onClick={()=>{
+            let childrenData=ele.children
+            xml = <li key={ele['typeId']} title={ele[keyName]} className=""
+                      onClick={(e)=>{
                             //设置branch数据状态
+                            e.stopPropagation();
                             this.branchCheckBoxHandler(ele);
                      }}>
                 <div className='multi-list-checkbox'>
                     <b className={(dropDownBranch.indexOf(ele)>=0?'active':'')+(partSelectBranch[ele.typeId]?' part-select':'')}></b>
                 </div>
-                <div className='multi-drop-down-list-content'
-                     onMouseOver={()=>{
-                                    this.calculateNextMenuTree(depth,index)
-                                 }}
-                    >
+                <div className='multi-drop-down-list-content'>
                     {ele[keyName]}
                 </div>
                 <em></em>
+                {
+                    childrenData&&childrenData.length?(
+                        <ul className="multi-drop-down-list select-drop-down-list">
+                            {
+                                childrenData.map((ele,index)=>{
+                                    return ele[leafName]?this.renderList('leaf',ele,index):this.renderList('branch',ele,index);
+                                })
+                            }
+                        </ul>
+                    ):null
+                }
             </li>
         }else{
             //如果数据在formGroup里面，则勾选
-            xml = <li title={ele[keyName]}  className="multi-drop-down-input" onClick={()=>{this.checkboxHandler(ele)}} key={depth+ele['typeId']}>
+            xml = <li title={ele[keyName]}  className="multi-drop-down-input" onClick={(e)=>{e.stopPropagation();this.checkboxHandler(ele)}} key={ele['typeId']}>
                 <i className={formGroup.indexOf(ele)<0?'check-box':'check-box active'}>
                     <b></b>
                 </i>
@@ -231,22 +239,6 @@ export default class MultiDropDownMenu extends Component {
         return  xml;
 
     }
-    /**
-     * 计算新的menu队列数据
-     * @param depth 状态数组深度
-     * @param index 替换的序数号
-     */
-    calculateNextMenuTree(depth,index){
-        let cachedDropDownQueue=this.state.dropDownQueue;
-        cachedDropDownQueue=cachedDropDownQueue.slice(0,depth);//每次鼠标浮动，保留之前的
-        cachedDropDownQueue[depth] = index;//队列尾部添加序数号
-        //推入数据
-        this.setState({
-            dropDownQueue:cachedDropDownQueue
-        });
-        return cachedDropDownQueue;
-    }
-
     componentWillReceiveProps(nextProps) {
         if(nextProps.dropDownData){
             let activeNodeList=[],
@@ -398,47 +390,18 @@ export default class MultiDropDownMenu extends Component {
         ,dropDownData);
     };
     /**
-     * 下拉children所需要的数据形式
-     * [1,2,3]=>
-     * dropDownData[1].children//第1层
-     * dropDownData[1].children[2].children
-     * dropDownData[1].children[2].children[3]
-     * @type {{dropDownQueue: Array}}
-     */
-    renderQueuedMenu(dropDownQueue){
-        var cachedData=[];
-        dropDownQueue.reduce((preQueue,cur)=>{
-            /**
-             * 参数叠加
-             */
-            preQueue.push(cur);
-
-            /**
-             * 往数组推送数据
-             */
-            var childMenuSourceData = this.getSourceData.call(this,preQueue);
-            if(childMenuSourceData && childMenuSourceData.length>0 ){
-                cachedData.push(this.renderChildMenu(childMenuSourceData,preQueue.length,dropDownQueue));
-            }
-            return preQueue;
-        },[]);
-        return cachedData;
-    }
-
-    /**
      *
      * @param listData 菜单数据
      * @param depth 菜单深度(parent的节点)
      * @return {XML}
      * active的序数号码dropDownQueue[depth+1]
      */
-    renderChildMenu(listData,depth,dropDownQueue){
+    renderChildMenu(listData){
         let {leafName}=this.state;
-        let activeIndex = dropDownQueue[depth];
-        let XML =  <ul className="multi-drop-down-list select-drop-down-list" key={depth}>
+        let XML =  <ul className="multi-drop-down-list select-drop-down-list">
             {
                 listData&&listData.map((ele,index)=>{
-                    return ele[leafName]?this.renderList('leaf',ele,activeIndex,index,depth):this.renderList('branch',ele,activeIndex,index,depth);
+                    return ele[leafName]?this.renderList('leaf',ele,index):this.renderList('branch',ele,index);
                 })
             }
         </ul>;
@@ -447,14 +410,10 @@ export default class MultiDropDownMenu extends Component {
 
     render(){
         let {dropDownData}= this.props;
-        let {dropDownQueue,title}=this.state;
+        let {title}=this.state;
         return(
             <div className='question-multi-menu'>
-                <div className="question-multi-menu-head" onMouseOver={()=>{
-                 this.setState({
-                    dropDownQueue:[]
-                 })
-                }}>
+                <div className="question-multi-menu-head">
                     <span className="drop-down-hint">
                     {title}
                     </span>
@@ -463,12 +422,8 @@ export default class MultiDropDownMenu extends Component {
                 {dropDownData&&dropDownData.length>0?
                     <div className="question-multi-menu-body">
                         {
-                            this.renderChildMenu(dropDownData,0,dropDownQueue)/*来自第0层*/
+                            this.renderChildMenu(dropDownData)
                         }
-                        {
-                            this.renderQueuedMenu(dropDownQueue)
-                        }
-
                     </div>:null
                 }
 
