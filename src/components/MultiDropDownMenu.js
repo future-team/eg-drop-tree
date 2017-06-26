@@ -30,6 +30,8 @@ export default class MultiDropDownMenu extends Component {
             leafName:props.leafName
         };
         this.formData=this.state.formGroup;
+        this.itemHeight=this.props.itemHeight||0;
+        this.offsetYMap={};
         this.treePathMap={
 
         };
@@ -211,7 +213,14 @@ export default class MultiDropDownMenu extends Component {
                     <b className={(dropDownBranch.indexOf(ele)>=0?'active':'')+(partSelectBranch[ele.typeId]?' part-select':'')}></b>
                 </div>
                 <div className='multi-drop-down-list-content'
-                     onMouseOver={()=>{
+                     onMouseOver={(e)=>{
+                                    if(!this.itemHeight){
+                                    this.itemHeight=e.target.offsetHeight
+                                    }
+                                    this.reCalPosFlag=true;
+                                    this.hoverEle=ele;
+                                    this.hoverEleIndex=index;
+                                    this.dropDownDepth=depth;
                                     this.calculateNextMenuTree(depth,index)
                                  }}
                     >
@@ -246,7 +255,40 @@ export default class MultiDropDownMenu extends Component {
         });
         return cachedDropDownQueue;
     }
-
+    componentDidUpdate(){
+        let {reCalPosFlag,hoverEle,hoverEleIndex,itemHeight,dropDownDepth,offsetYMap}=this,
+            {dropDownQueue}=this.state;
+        //每次hover结束之后都需要重新计算位置
+        if(this.reCalPosFlag){
+            //当前需要展开的那一列list
+            let curDropDownLi=this.refs['drop-down-'+(dropDownDepth+1)],
+                curLevelData=this.props.dropDownData,
+                level1Length=curLevelData.length;
+            for(let index=0;index<dropDownQueue.length;index++){
+                curLevelData=curLevelData[dropDownQueue[index]].children
+            }
+            //curLevelData为当前需要展开那一列list的data
+            if(curDropDownLi){
+                let offsetY=hoverEleIndex*itemHeight;
+                //基于当前panel顶部的偏移量,offsetYMap始终缓存每一级panel基于第一级panel顶部的offset
+                offsetYMap[dropDownDepth]=offsetY;
+                if(dropDownDepth>0){
+                    //将其调整为基于第一级panel顶部的偏移量
+                    let parentOffsetY=offsetYMap[dropDownDepth-1]||0;
+                    offsetY=parentOffsetY+offsetY
+                }
+                if(offsetY+curLevelData.length*itemHeight>level1Length*itemHeight){
+                    offsetY=level1Length*itemHeight-curLevelData.length*itemHeight
+                }
+                if(offsetY<0){
+                    offsetY=0;
+                }
+                offsetYMap[dropDownDepth]=offsetY;
+                curDropDownLi.style.marginTop=offsetY+'px';
+            }
+            this.reCalPosFlag=false;
+        }
+    }
     componentWillReceiveProps(nextProps) {
         if(nextProps.dropDownData){
             let activeNodeList=[],
@@ -435,7 +477,7 @@ export default class MultiDropDownMenu extends Component {
     renderChildMenu(listData,depth,dropDownQueue){
         let {leafName}=this.state;
         let activeIndex = dropDownQueue[depth];
-        let XML =  <ul className="multi-drop-down-list select-drop-down-list" key={depth}>
+        let XML =  <ul className="multi-drop-down-list select-drop-down-list" key={'drop-down-'+depth} ref={'drop-down-'+depth}>
             {
                 listData&&listData.map((ele,index)=>{
                     return ele[leafName]?this.renderList('leaf',ele,activeIndex,index,depth):this.renderList('branch',ele,activeIndex,index,depth);
