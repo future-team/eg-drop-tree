@@ -215,7 +215,15 @@ export default class MultiDropDownMenu extends Component {
                 <div className='multi-drop-down-list-content'
                      onMouseOver={(e)=>{
                                     if(!this.itemHeight){
-                                    this.itemHeight=e.target.offsetHeight
+                                    let parentNode=e.target;
+                                    while(parentNode.nodeName!=='LI'){
+                                        parentNode=parentNode.parentElement
+                                        if(!parentNode){
+                                            parentNode=e.target;
+                                            break;
+                                        }
+                                    }
+                                    this.itemHeight=parentNode.offsetHeight
                                     }
                                     this.reCalPosFlag=true;
                                     this.hoverEle=ele;
